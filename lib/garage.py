@@ -16,7 +16,9 @@ class GarageDoor(object):
 
         # Config
         self.relay_pin = config['relay']
-        self.state_pin = config['state']
+        # self.state_pin = config['state']
+        self.close_pin = config['close']
+        self.open_pin = config['open']
         self.id = config['id']
         self.mode = int(config.get('state_mode') == 'normally_closed')
         self.invert_relay = bool(config.get('invert_relay'))
@@ -29,8 +31,12 @@ class GarageDoor(object):
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.relay_pin, GPIO.OUT)
-        GPIO.setup(self.state_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(self.state_pin, GPIO.BOTH, callback=self.__stateChanged, bouncetime=300)
+        # GPIO.setup(self.state_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.open_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.close_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        # GPIO.add_event_detect(self.state_pin, GPIO.BOTH, callback=self.__stateChanged, bouncetime=300)
+        GPIO.add_event_detect(self.open_pin, GPIO.BOTH, callback=self.__stateChanged, bouncetime=300)
+        GPIO.add_event_detect(self.close_pin, GPIO.BOTH, callback=self.__stateChanged, bouncetime=300)
 
 
         # Set default relay state to false (off)
@@ -60,11 +66,22 @@ class GarageDoor(object):
     def state(self):
         # Read the mode from the config. Then compare the mode to the current state. IE. If the circuit is normally closed and the state is 1 then the circuit is closed.
         # and vice versa for normally open
-        state = GPIO.input(self.state_pin)
-        if  state == self.mode:
-            return 'closed'
+        # state = GPIO.input(self.state_pin)
+        # if  state == self.mode:
+        #     return 'closed'
+        # else:
+        #     return 'open'
+        opened = GPIO.input(self.open_pin)
+        closed = GPIO.input(self.close_pin)
+
+        if opened and not closed:
+            pass
+        elif not opened and closed:
+            pass
+        elif not opened and not closed:
+            pass
         else:
-            return 'open'
+            pass # invalid state
 
     # Mimick a button press by switching the GPIO pin on and off quickly
     def __press(self):
@@ -75,9 +92,12 @@ class GarageDoor(object):
    
     # Provide an event for when the state pin changes
     def __stateChanged(self, channel):
-        if channel == self.state_pin:
-            # Had some issues getting an accurate value so we are going to wait for a short timeout
-            # after a statechange and then grab the state
+        # if channel == self.state_pin:
+        #     # Had some issues getting an accurate value so we are going to wait for a short timeout
+        #     # after a statechange and then grab the state
+        #     time.sleep(SHORT_WAIT)
+        #     self.onStateChange.fire(self.state)
+        if channel == self.open_pin or channel == self.close_pin:
             time.sleep(SHORT_WAIT)
             self.onStateChange.fire(self.state)
 
