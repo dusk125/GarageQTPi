@@ -59,7 +59,8 @@ class GarageDoor(object):
             self.__press()
 
     def stop(self):
-        self.__press()
+        if self.state == 'opening':
+            self.__press()
 
     # State is a read only property that actually gets its value from the pin
     @property
@@ -75,11 +76,11 @@ class GarageDoor(object):
         closed = GPIO.input(self.close_pin)
 
         if opened and not closed:
-            pass
+            return 'open'
         elif not opened and closed:
-            pass
+            return 'closed'
         elif not opened and not closed:
-            pass
+            return 'opening'
         else:
             pass # invalid state
 
