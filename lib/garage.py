@@ -79,7 +79,7 @@ class GarageDoor(object):
             return 'open'
         elif not opened and closed:
             return 'closed'
-        elif not opened and not closed:
+        elif opened and closed:
             return 'opening'
         else:
             pass # invalid state
