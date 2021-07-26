@@ -24,7 +24,7 @@ class GarageDoor(object):
         self.invert_relay = bool(config.get('invert_relay'))
 
         # Setup
-        self._state = None
+        self._prev = None
         self.onStateChange = EventHook()
 
         # Set relay pin to output, state pin to input, and add a change listener to the state pin
@@ -52,10 +52,12 @@ class GarageDoor(object):
 
     def open(self):
         if self.state == 'closed':
+            self._prev = self.state
             self.__press()
 
     def close(self):
         if self.state == 'open':
+            self._prev = self.state
             self.__press()
 
     def stop(self):
@@ -80,7 +82,10 @@ class GarageDoor(object):
         elif not opened and closed:
             return 'closed'
         elif opened and closed:
-            return 'opening'
+            if self._prev == 'closed':
+                return 'opening'
+            else:
+                return 'closing'
         else:
             pass # invalid state
 
