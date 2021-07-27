@@ -61,7 +61,8 @@ class GarageDoor(object):
             self.__press()
 
     def stop(self):
-        if self.state == 'opening':
+        state = self.state
+        if state == 'opening' or state == 'closing':
             self.__press()
 
     # State is a read only property that actually gets its value from the pin
